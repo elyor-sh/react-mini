@@ -1,0 +1,20 @@
+{
+  "name": "react-mini",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.10.8",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "esbuild": "^0.24.2",
+    "http": "^0.0.1-security"
+  }
+}

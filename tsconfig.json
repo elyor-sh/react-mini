@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "CommonJS",
+    "jsx": "react", // Указываем, что используется новая автоматическая трансформация JSX
+    "jsxImportSource": "./src/miniReact", // Указываем, откуда брать функции для JSX
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  }
+}
