@@ -1,9 +1,7 @@
 import {MiniReactElement} from "./miniReact";
 import {isPrimitive} from "./renderToDom/utils/isPrimitive";
+import {components, setCurrentComponentId} from "./globals/state";
 // import {renderToDOM} from "./renderToDom";
-
-export const components: Record<string, any> = {};
-export let currentComponentId: string | null = null;
 
 export function renderComponent(
     vnode: MiniReactElement,
@@ -15,11 +13,11 @@ export function renderComponent(
     if (!components[id]) {
         components[id] = {
             render: () => {
-                currentComponentId = id; // Устанавливаем текущий компонент
+                setCurrentComponentId(id); // Устанавливаем текущий компонент
                 components[id].stateIndex = 0; // Сбрасываем индекс состояний
                 container.innerHTML = ''
                 renderToDOM(vnode, container, id); // Рендерим виртуальный DOM
-                currentComponentId = null; // Сбрасываем текущий компонент
+                setCurrentComponentId(null); // Сбрасываем текущий компонент
             },
             states: [],
             stateIndex: 0,
