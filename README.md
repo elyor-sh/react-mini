@@ -1,0 +1,1 @@
+<h1>React.js mini version</h1>

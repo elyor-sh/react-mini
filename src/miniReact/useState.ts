@@ -1,24 +1,35 @@
-import { rerender} from './render';
-
-const state: any[] = [];
-let stateIndex = 0;
+import {components, currentComponentId} from "./render";
 
 export function useState<T>(initialValue: T): [T, (newValue: T) => void] {
-    const currentIndex = stateIndex; // Захватываем текущий индекс
-    stateIndex++; // Увеличиваем индекс для следующего состояния
+    if (currentComponentId === null) {
+        throw new Error('useState can only be used inside a component');
+    }
 
-    if (state[currentIndex] === undefined) {
-        state[currentIndex] = initialValue; // Инициализация состояния
+    const component = components[currentComponentId];
+
+    if (!component) {
+        throw new Error(`Component with ID ${currentComponentId} not found.`);
+    }
+
+    const { states } = component;
+
+    // Используем stateIndex для получения/установки текущего состояния
+    const stateIndex = component.stateIndex++;
+
+    if (states[stateIndex] === undefined) {
+        states[stateIndex] = initialValue;
     }
 
     const setState = (newValue: T) => {
-        state[currentIndex] = newValue; // Обновляем состояние
-        rerender(); // Перерендериваем компонент
+        states[stateIndex] = newValue;
+
+        console.log('components ', components)
+
+        console.log('component ', component)
+
+        // Рендерим только текущий компонент
+        component.render();
     };
 
-    return [state[currentIndex], setState];
-}
-
-export function resetStateIndex() {
-    stateIndex = 0; // Сбрасываем индекс перед каждым новым рендером
+    return [states[stateIndex], setState];
 }

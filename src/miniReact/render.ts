@@ -1,68 +1,75 @@
-// src/miniReact/render.ts
 import {MiniReactElement} from "./miniReact";
-import {resetStateIndex} from "./useState";
-import {isPrimitive} from "./utils/isPrimitive";
+import {isPrimitive} from "./renderToDom/utils/isPrimitive";
+// import {renderToDOM} from "./renderToDom";
 
-// Глобальная функция для вызова перерендеринга
-export let rerender: () => void;
+export const components: Record<string, any> = {};
+export let currentComponentId: string | null = null;
 
-export function renderComponent(element: MiniReactElement, container: HTMLElement) {
-    if (!element || typeof element !== 'object' || !element.type) {
-        throw new Error(
-            `Expected a valid MiniReactElement but got ${typeof element}. Did you forget to use JSX or call createElement()?`
-        );
-    }
+export function renderComponent(
+    vnode: MiniReactElement,
+    container: HTMLElement,
+    componentId?: string
+) {
+    const id = componentId ?? `component_${Object.keys(components).length}`;
 
-    if (typeof element.type === 'function') {
-        // Если это функциональный компонент
-        const component = element.type;
-
-        rerender = () => {
-            resetStateIndex(); // Сбрасываем индекс состояний перед каждым рендером
-            const vnode = component(element.props); // Получаем новое VDOM дерево
-            container.innerHTML = ''; // Очищаем контейнер
-            renderToDOM(vnode, container); // Рендерим новое VDOM дерево
+    if (!components[id]) {
+        components[id] = {
+            render: () => {
+                currentComponentId = id; // Устанавливаем текущий компонент
+                components[id].stateIndex = 0; // Сбрасываем индекс состояний
+                container.innerHTML = ''; // Очищаем контейнер
+                renderToDOM(vnode, container, id); // Рендерим виртуальный DOM
+                currentComponentId = null; // Сбрасываем текущий компонент
+            },
+            states: [],
+            stateIndex: 0,
         };
-
-        // Изначальный рендер
-        rerender();
-    } else {
-        // Если это обычный DOM-элемент
-        container.innerHTML = ''; // Очищаем контейнер
-        renderToDOM(element, container);
     }
+
+    components[id].render();
 }
-// Функция для рендеринга виртуальных элементов в DOM
-export const renderToDOM = (vnode: MiniReactElement, container: HTMLElement) => {
-    if (typeof vnode.type === "function") {
-        // Рендер функциональных компонентов
-        return renderToDOM((vnode.type as Function)(vnode.props), container);
+
+export function renderToDOM(
+    vnode: MiniReactElement,
+    container: HTMLElement,
+    parentComponentId?: string
+) {
+    if (typeof vnode.type === 'function') {
+        const id = parentComponentId
+            ? `${parentComponentId}_${vnode.type.name}`
+            : `component_${Object.keys(components).length}`;
+
+        // Проверяем, не был ли компонент уже отрендерен
+        if (!components[id]) {
+            renderComponent(vnode, container, id);
+        }
+        return;
     }
 
-    const dom = document.createElement(vnode.type as string);
+    const domNode = document.createElement(vnode.type as string);
 
     // Применяем пропсы
     Object.keys(vnode.props || {}).forEach((key) => {
-        if (key.startsWith("on")) {
+        if (key.startsWith('on')) {
             const event = key.toLowerCase().substring(2);
-            dom.addEventListener(event, vnode.props[key]);
+            domNode.addEventListener(event, vnode.props[key]);
         } else {
-            dom[key] = vnode.props[key];
+            domNode[key] = vnode.props[key];
         }
     });
 
     // Рендер детей
     vnode.children?.forEach((child) => {
         if (isPrimitive(child)) {
-            dom.appendChild(document.createTextNode(String(child)));
+            domNode.appendChild(document.createTextNode(String(child)));
         } else if (Array.isArray(child)) {
-           child.forEach(ch => {
-               renderToDOM(ch, dom)
-           })
+            child.forEach(ch => {
+                renderToDOM(ch, domNode, parentComponentId)
+            })
         } else {
-            renderToDOM(child, dom);
+            renderToDOM(child, domNode, parentComponentId);
         }
     });
 
-    container.appendChild(dom); // Вставляем элемент в контейнер
-};
+    container.appendChild(domNode);
+}

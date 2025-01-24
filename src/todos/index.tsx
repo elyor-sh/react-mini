@@ -13,7 +13,7 @@ export const TodosList = () => {
         setTodos([...todos, todo])
     }
 
-    console.log('Todo component re-rendered')
+    console.log('Todo component re-rendered', todos)
 
     return (
         <div>
