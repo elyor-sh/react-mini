@@ -1,5 +1,5 @@
 import { createElement } from "./miniReact/miniReact";
-import {renderComponent} from "./miniReact/render";
+import {renderToDOM} from "./miniReact/render";
 import {useState} from "./miniReact/useState";
 import {useEffect} from "./miniReact/useEffect";
 import {TodosList} from "./todos";
@@ -27,4 +27,4 @@ const App = () => {
 };
 
 const container = document.getElementById("root");
-renderComponent(<App/>, container!);
+renderToDOM(<App/>, container!);

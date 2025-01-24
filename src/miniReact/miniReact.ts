@@ -2,6 +2,7 @@ export type MiniReactElement = {
     type: string | Function | number;
     props: Record<string, any>;
     children: MiniReactElement[];
+    __internalId?: string;
 };
 
 export const createElement = (
