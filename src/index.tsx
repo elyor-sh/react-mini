@@ -14,7 +14,7 @@ const App = () => {
     console.log('App component re-rendered')
 
     return (
-        <div>
+        <div id='app'>
             <h1>{String(count)}</h1>
             <button onClick={() => {
                 setCount(count + 1)

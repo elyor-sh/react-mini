@@ -17,7 +17,7 @@ export function renderComponent(
             render: () => {
                 currentComponentId = id; // Устанавливаем текущий компонент
                 components[id].stateIndex = 0; // Сбрасываем индекс состояний
-                container.innerHTML = ''; // Очищаем контейнер
+                container.innerHTML = ''
                 renderToDOM(vnode, container, id); // Рендерим виртуальный DOM
                 currentComponentId = null; // Сбрасываем текущий компонент
             },
@@ -36,14 +36,20 @@ export function renderToDOM(
 ) {
     if (typeof vnode.type === 'function') {
         const id = parentComponentId
-            ? `${parentComponentId}_${vnode.type.name}`
+            ? parentComponentId
             : `component_${Object.keys(components).length}`;
+
+        console.log('components ', components)
 
         // Проверяем, не был ли компонент уже отрендерен
         if (!components[id]) {
-            renderComponent(vnode, container, id);
+            const hDiv = document.createElement('slot')
+            hDiv.dataset.helper = 'unstable__helper-slot'
+            container.appendChild(hDiv)
+            return renderComponent(vnode, hDiv, id);
         }
-        return;
+
+        return renderToDOM((vnode.type as Function)(vnode.props), container);
     }
 
     const domNode = document.createElement(vnode.type as string);
